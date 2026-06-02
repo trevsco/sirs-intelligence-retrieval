@@ -1,0 +1,16 @@
+CLASSIFICATION: UNCLASSIFIED // SIRS SYSTEM DEMO DATA
+AUTONOMOUS NAVIGATION UNIT PROJECT: PROJECT HELIOS PHASE IV
+PRINCIPAL INVESTIGATOR: ARCHIMEDES AUTONOMY TEAM
+DATE: 2026-05-12
+
+Project Helios Phase IV marks the standard integration of local neural-guided drone operations inside GPS-denied environments. The system implements a triple-redundant Visual Inertial Odometry (VIO) system running concurrently with a lightweight solid-state LiDAR array (905nm wavelength, 120-degree horizontal field of view).
+
+Key Performance Metrics:
+- Drift Error Rate: Under 0.12% of total traveled distance in indoor corridors
+- Object Detection Latency: 12.4 milliseconds using TensorRT optimized MobileNet-SIRS models
+- Obstacle Avoidance Range: 0.5 to 15.0 meters at velocity up to 8.5 m/s
+- CPU Overhead: 42% on embedded NVIDIA Jetson Orin Nano modules
+
+Key Research Findings:
+1. Dynamic LiDAR Filtering: In heavy dust or particulate environments, standard LiDAR noise increases by 400%. Implementing the SIRS-LiDAR-Filter-V2 algorithm successfully suppressed dust reflections, recovering 95% of target signals.
+2. Semantic Localization: Edge-based semantic segmentation allows the unit to recognize exit doors, command panels, and potential threats in real time without a central cloud server, ensuring 100% offline security.

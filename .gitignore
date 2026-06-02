@@ -1,0 +1,21 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+
+# FAISS index (large binary files)
+backend/models/
+backend/logs/
+
+# Node
+frontend/node_modules/
+
+# Uploads (sensitive documents)
+backend/uploads/
+
+# OS
+.DS_Store
+Thumbs.db

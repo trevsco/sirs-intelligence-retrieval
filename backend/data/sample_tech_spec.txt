@@ -1,0 +1,16 @@
+CLASSIFICATION: UNCLASSIFIED // SIRS SYSTEM DEMO DATA
+PROPULSION SYSTEM MODEL: X1-TRITON ION DRIVE
+DEVELOPER: AEGIS DEFENSE CORP / PROPULSION GROUP
+STATUS: OPERATIONAL ARCHITECTURE
+
+The X1-Triton Ion Drive represents the vanguard of deep-space and sub-orbital high-efficiency propulsion. It relies on a xenon-based gaseous fuel core, ionized through high-frequency microwave arrays operating at 2.45 GHz. The ionized plasma is accelerated using a series of parallel electrostatic grids biased to +4500V (anode) and -1200V (cathode), generating a specific impulse (Isp) of 4,200 seconds under vacuum.
+
+Operational thrust metrics:
+- Nominal Thrust: 1.25 Newtons
+- Peak Thrust: 2.80 Newtons (requires thermal bypass activated)
+- Input Power Requirements: 12.5 kW nominal, up to 30 kW during hyper-acceleration cycles
+- Exhaust Velocity: 41,200 meters per second
+- Core Grid Temperature Limit: 1,850 Kelvin
+
+Critical Operational Directives:
+Grid erosion must be monitored in real-time via telemetry. Electrostatic cathode grid replacement must occur every 5,000 hours of continuous operations to prevent grid-short events. Emergency shutdown protocol SIRS-GRID-SHUTDOWN is automatically engaged if exhaust current exceeds 2.5 Amps.
