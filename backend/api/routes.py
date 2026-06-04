@@ -33,7 +33,7 @@ class QueryResponse(BaseModel):
     confidence: float
     num_chunks_retrieved: int
     elapsed_ms: float
-
+    compliance_report: Optional[Dict[str, Any]] = None
 # 1. GET /health
 @router.get("/health", response_model=Dict[str, Any])
 async def get_health() -> Dict[str, Any]:
@@ -78,13 +78,19 @@ async def get_system_status() -> Dict[str, Any]:
 # 3. POST /query
 @router.post("/query", response_model=QueryResponse)
 async def post_query(request: QueryRequest) -> QueryResponse:
-    """Execute plan-based RAG query via Agent Controller."""
     try:
         response_payload = await agent_controller.handle_query(
             query=request.query,
             top_k=request.top_k,
             threshold=request.threshold
         )
+
+        # ─── IEEE Compliance Check ───────────────────────────────
+        from tools.ieee_compliance_tool import check_compliance
+        answer_text = response_payload.get("answer", "")
+        response_payload["compliance_report"] = check_compliance(answer_text)
+        # ─────────────────────────────────────────────────────────
+
         return QueryResponse(**response_payload)
     except Exception as e:
         logger.exception("FastAPI POST /query endpoint error")

@@ -8,6 +8,7 @@ from config import settings
 from retrieval.embeddings import embedding_model
 from retrieval.vector_store import vector_store
 from api.routes import router
+from routes.ieee_compliance_route import router as compliance_router
 
 # Import tools explicitly to trigger their registration decorators
 import tools.retrieval_tool
@@ -73,6 +74,7 @@ app.add_middleware(
 
 # Register routes API router
 app.include_router(router)
+app.include_router(compliance_router, prefix="/compliance", tags=["IEEE Compliance"])
 
 @app.get("/")
 def read_root():

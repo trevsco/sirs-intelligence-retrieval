@@ -162,6 +162,29 @@ python seed_demo_data.py
 
 ---
 
+## IEEE Compliance Check
+
+SIRS includes a built-in IEEE compliance validation layer integrated into the RAG pipeline.
+
+### Supported Standards
+| Standard   | Name                              |
+|------------|-----------------------------------|
+| IEEE 12207 | Software Life Cycle Processes     |
+| IEEE 830   | Software Requirements Specifications |
+| IEEE 829   | Software Test Documentation       |
+| IEEE 1016  | Software Design Description       |
+| IEEE 730   | Software Quality Assurance        |
+
+### Endpoints
+- `POST /compliance/check` — Run compliance check on any text
+- `GET  /compliance/info`  — List all supported IEEE standards
+
+### Running Tests
+```bash
+cd backend
+python -m pytest tests/test_ieee_compliance.py -v
+```
+
 ## 🧩 Application Core Tools
 
 1. **retrieve_documents** (Action: `search`)
