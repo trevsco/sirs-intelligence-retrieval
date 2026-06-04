@@ -12,6 +12,12 @@ from retrieval.chunking import DocumentChunker
 from retrieval.vector_store import vector_store
 from config import settings
 
+# ── NEW: IEEE compliance imports ──────────────────────────────────────────────
+from tools.ieee_compliance_tool import check_compliance
+from tools.ieee_compliance_store import save_compliance, delete_compliance
+# ─────────────────────────────────────────────────────────────────────────────
+
+
 def extract_text(file_path: str) -> str:
     """Parse text based on document extension types (.pdf, .docx, .txt, .md)."""
     _, ext = os.path.splitext(file_path.lower())
@@ -37,6 +43,7 @@ def extract_text(file_path: str) -> str:
         
     else:
         raise ValueError(f"Format '{ext}' is not supported for extraction.")
+
 
 @tool_registry.register(
     tool_name="upload_document",
@@ -76,6 +83,16 @@ async def ingest_document(file_path: str, filename: str, doc_id: str) -> MCPResp
         text = extract_text(file_path)
         if not text.strip():
             raise ValueError("No text content could be extracted from the document.")
+
+        # ── NEW: Run IEEE Compliance Check on document text ───────────────────
+        logger.info(f"Running IEEE compliance check on document: {filename}")
+        compliance_report = check_compliance(text)
+        save_compliance(doc_id=doc_id, filename=filename, report=compliance_report)
+        logger.info(
+            f"IEEE compliance for {filename}: "
+            f"{compliance_report['overall_score_pct']}% — {compliance_report['verdict']}"
+        )
+        # ─────────────────────────────────────────────────────────────────────
             
         # 2. Chunk Text
         chunks = DocumentChunker.chunk_text(
@@ -94,7 +111,14 @@ async def ingest_document(file_path: str, filename: str, doc_id: str) -> MCPResp
             "filename": filename,
             "chunk_count": len(chunks),
             "total_characters": len(text),
-            "status": "fully_indexed"
+            "status": "fully_indexed",
+            # ── NEW: include compliance summary in upload response ────────────
+            "ieee_compliance": {
+                "overall_score_pct": compliance_report["overall_score_pct"],
+                "overall_passed":    compliance_report["overall_passed"],
+                "verdict":           compliance_report["verdict"],
+            }
+            # ─────────────────────────────────────────────────────────────────
         }
         
         return MCPResponse.make_success(
@@ -115,6 +139,7 @@ async def ingest_document(file_path: str, filename: str, doc_id: str) -> MCPResp
             error_detail=f"Ingestion failed: {str(e)}",
             execution_time_ms=elapsed_ms
         )
+
 
 @tool_registry.register(
     tool_name="upload_document",
@@ -139,6 +164,10 @@ async def delete_document_tool(doc_id: str) -> MCPResponse:
     try:
         # Rebuilds the FAISS store without the specified doc_id
         vector_store.delete_document(doc_id)
+
+        # ── NEW: Also remove the stored IEEE compliance result ────────────────
+        delete_compliance(doc_id)
+        # ─────────────────────────────────────────────────────────────────────
         
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
         

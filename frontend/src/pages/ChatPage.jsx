@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import IEEEComplianceReport from '../components/IEEEComplianceReport'; // ← NEW
 
 function ChatPage({ refreshStats }) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
 
-  // Updated to accept an optional 'overrideText' for our Analyze button
   const handleSend = async (e, overrideText = null) => {
     if (e) e.preventDefault();
     
@@ -14,7 +14,7 @@ function ChatPage({ refreshStats }) {
     if (!currentQuery.trim()) return;
 
     setHistory((prev) => [...prev, { role: 'user', content: currentQuery }]);
-    if (!overrideText) setQuery(''); // Only clear input if typed manually
+    if (!overrideText) setQuery('');
     setLoading(true);
 
     try {
@@ -26,7 +26,11 @@ function ChatPage({ refreshStats }) {
       
       setHistory((prev) => [
         ...prev, 
-        { role: 'assistant', content: response.answer }
+        { 
+          role: 'assistant', 
+          content: response.answer,
+          compliance_report: response.compliance_report || null, // ← NEW
+        }
       ]);
     } catch (err) {
       console.error(err);
@@ -39,7 +43,6 @@ function ChatPage({ refreshStats }) {
     }
   };
 
-  // Dedicated function for the Analyze button
   const handleAnalyze = () => {
     const analysisPrompt = "Please analyze the indexed documents and provide a comprehensive summary of their contents.";
     handleSend(null, analysisPrompt);
@@ -48,7 +51,7 @@ function ChatPage({ refreshStats }) {
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow overflow-hidden">
       
-      {/* Header Toolbar with Analyze Button */}
+      {/* Header Toolbar */}
       <div className="bg-gray-50 border-b border-gray-200 p-4 flex justify-between items-center">
         <h2 className="text-lg font-bold text-gray-700">Intelligence Query</h2>
         <button
@@ -68,25 +71,35 @@ function ChatPage({ refreshStats }) {
           </div>
         ) : (
           history.map((msg, idx) => (
-            <div 
-              key={idx} 
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div 
-                className={`max-w-[75%] rounded-lg px-4 py-3 ${
-                  msg.role === 'user' 
-                    ? 'bg-blue-600 text-white' 
-                    : msg.error 
-                      ? 'bg-red-50 text-red-600 border border-red-200' 
-                      : 'bg-gray-100 text-gray-800'
-                }`}
-              >
-                <div className="text-xs font-semibold mb-1 opacity-75">
-                  {msg.role === 'user' ? 'You' : 'System'}
+            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[75%] ${msg.role === 'user' ? '' : 'w-full'}`}>
+                
+                {/* Message bubble — unchanged */}
+                <div 
+                  className={`rounded-lg px-4 py-3 ${
+                    msg.role === 'user' 
+                      ? 'bg-blue-600 text-white' 
+                      : msg.error 
+                        ? 'bg-red-50 text-red-600 border border-red-200' 
+                        : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  <div className="text-xs font-semibold mb-1 opacity-75">
+                    {msg.role === 'user' ? 'You' : 'System'}
+                  </div>
+                  <div className="whitespace-pre-wrap text-sm">
+                    {msg.content}
+                  </div>
                 </div>
-                <div className="whitespace-pre-wrap text-sm">
-                  {msg.content}
-                </div>
+
+                {/* ── NEW: IEEE Compliance Report below assistant message ── */}
+                {msg.role === 'assistant' && !msg.error && msg.compliance_report && (
+                  <div className="mt-3">
+                    <IEEEComplianceReport report={msg.compliance_report} />
+                  </div>
+                )}
+                {/* ─────────────────────────────────────────────────────── */}
+
               </div>
             </div>
           ))

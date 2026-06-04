@@ -13,6 +13,7 @@ from mcp.communication import mcp_bus
 from mcp.tool_registry import tool_registry
 from retrieval.vector_store import vector_store
 from llm.ollama_client import ollama_client
+from tools.ieee_compliance_store import get_compliance, get_all_compliance
 
 router = APIRouter(prefix="/api/v1")
 
@@ -226,3 +227,49 @@ async def get_settings() -> Dict[str, Any]:
         "ALLOWED_EXTENSIONS": settings.ALLOWED_EXTENSIONS,
         "ollama_models": llm_status.get("models", [])
     }
+
+# 10. GET /documents/{doc_id}/compliance
+@router.get("/documents/{doc_id}/compliance", response_model=Dict[str, Any])
+async def get_document_compliance(doc_id: str) -> Dict[str, Any]:
+    """
+    Get the full IEEE compliance report for a specific uploaded document.
+    The report is generated at upload time by scanning the document text.
+    """
+    from tools.ieee_compliance_store import get_compliance
+    result = get_compliance(doc_id)
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No IEEE compliance data found for document '{doc_id}'. "
+                   f"Re-upload the document to generate a compliance report."
+        )
+    return result
+# 11. GET /documents/compliance/all
+@router.get("/documents/compliance/all", response_model=Dict[str, Any])
+async def get_all_documents_compliance() -> Dict[str, Any]:
+    """
+    Get IEEE compliance summaries for ALL uploaded documents.
+    Returns a dict keyed by doc_id with score and verdict per document.
+    """
+    from tools.ieee_compliance_store import get_all_compliance
+    all_data = get_all_compliance()
+ 
+    # Return lightweight summary (not full report) for the document list view
+    summary = {}
+    for doc_id, entry in all_data.items():
+        report = entry.get("report", {})
+        summary[doc_id] = {
+            "filename":          entry.get("filename"),
+            "overall_score_pct": report.get("overall_score_pct", 0),
+            "overall_passed":    report.get("overall_passed", False),
+            "verdict":           report.get("verdict", "Unknown"),
+            "standards": [
+                {
+                    "id":       s.get("id"),
+                    "passed":   s.get("passed"),
+                    "score_pct": s.get("score_pct"),
+                }
+                for s in report.get("standards", [])
+            ]
+        }
+    return summary
