@@ -1,115 +1,149 @@
+"""
+llm/ollama_client.py
+---------------------
+Optimized Ollama client for SIRS.
+
+Key optimizations:
+1. Structured, defense-context system prompt for better answer quality
+2. Request timeout to prevent hanging queries
+3. Graceful fallback if Ollama is slow or offline
+4. Cleaner prompt formatting for more accurate retrieval-based answers
+"""
+
 import httpx
-from typing import Optional, Dict, Any, List
 from loguru import logger
 from config import settings
-import time
+
+# ── Timeout settings ──────────────────────────────────────────────────────────
+# 120 seconds for generation — phi4-mini on CPU can be slow
+# 10 seconds for status checks
+GENERATION_TIMEOUT = 120
+STATUS_TIMEOUT     = 10
+
+# ── System prompt ─────────────────────────────────────────────────────────────
+# This is the most impactful optimization.
+# A structured system prompt gives dramatically better, more focused answers.
+SYSTEM_PROMPT = """You are SIRS — a Secure Intelligence Retrieval System designed for defense and research operations.
+
+Your role is to answer questions strictly based on the provided document context.
+
+Rules you must follow:
+1. Answer ONLY from the provided context. Do not use outside knowledge.
+2. If the context does not contain the answer, say: "The indexed documents do not contain sufficient information to answer this query."
+3. Be precise, factual, and concise. Avoid filler phrases.
+4. Structure your answer clearly. Use bullet points for lists of facts.
+5. Always cite which document the information comes from when possible.
+6. Do not speculate or make assumptions beyond what the documents state.
+
+Classification: UNCLASSIFIED // DEVELOPMENT"""
+
 
 class OllamaClient:
-    def __init__(self) -> None:
+    """
+    Optimized HTTP client for local Ollama LLM inference.
+    """
+
+    def __init__(self):
         self.base_url = settings.OLLAMA_BASE_URL
-        self.model = settings.OLLAMA_MODEL
+        self.model    = settings.OLLAMA_MODEL
 
-    async def generate(
-        self, 
-        prompt: str, 
-        system_prompt: Optional[str] = None, 
-        format_type: Optional[str] = None
-    ) -> str:
+    def _build_prompt(self, query: str, context: str) -> str:
         """
-        Send a generation request to the local Ollama LLM endpoint.
-        Returns the generated string.
+        Build a well-structured prompt.
+        Structured prompts give significantly better answers than raw concatenation.
         """
-        url = f"{self.base_url}/api/generate"
-        payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {
-                "temperature": settings.LLM_TEMPERATURE,
-                "num_predict": settings.LLM_MAX_TOKENS
-            }
-        }
-        if system_prompt:
-            payload["system"] = system_prompt
-        if format_type:
-            # Ollama supports format="json" to force JSON schema output
-            payload["format"] = format_type
+        return (
+            f"{SYSTEM_PROMPT}\n\n"
+            f"{'='*60}\n"
+            f"DOCUMENT CONTEXT:\n"
+            f"{'='*60}\n"
+            f"{context.strip()}\n\n"
+            f"{'='*60}\n"
+            f"INTELLIGENCE QUERY:\n"
+            f"{'='*60}\n"
+            f"{query.strip()}\n\n"
+            f"ANSWER (based strictly on the context above):"
+        )
+
+    async def generate(self, query: str, context: str) -> str:
+        """
+        Generate an answer using the local Ollama LLM.
+
+        Optimizations:
+        - Structured system prompt for better quality
+        - Explicit timeout to prevent hanging
+        - Graceful error message if Ollama is unavailable
+        """
+        prompt = self._build_prompt(query, context)
 
         try:
-            logger.info(f"Dispatching prompt to Ollama model='{self.model}'...")
-            logger.info(
-                f"Prompt length: {len(prompt)} chars | "
-                f"Model: {self.model} | "
-                f"Max Tokens: {settings.LLM_MAX_TOKENS}"
-            )
-
-            start_time = time.time()
-
-            async with httpx.AsyncClient(timeout=300) as client:
-                response = await client.post(url, json=payload)
-
-            elapsed_time = time.time() - start_time
-
-            logger.info(
-                f"Ollama request completed in {elapsed_time:.2f} seconds"
-            )
-
-            if response.status_code == 200:
-                data = response.json()
-                response_text = data.get("response", "").strip()
-                logger.info(
-                    f"Ollama response generated successfully. "
-                    f"Output length: {len(response_text)} chars"
+            async with httpx.AsyncClient(timeout=GENERATION_TIMEOUT) as client:
+                response = await client.post(
+                    f"{self.base_url}/api/generate",
+                    json={
+                        "model":  self.model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {
+                            "temperature": settings.LLM_TEMPERATURE,
+                            "num_predict": settings.LLM_MAX_TOKENS,
+                            # Additional options for better quality output
+                            "top_p":       0.9,    # nucleus sampling
+                            "repeat_penalty": 1.1, # reduce repetition
+                        }
+                    }
                 )
-                return response_text
-            else:
-                err_msg = f"Ollama generation failed with status code {response.status_code}: {response.text}"
-                logger.error(err_msg)
-                raise Exception(err_msg)
+                response.raise_for_status()
+                result = response.json()
+                answer = result.get("response", "").strip()
+
+                if not answer:
+                    return "The system generated an empty response. Please rephrase your query."
+
+                return answer
+
+        except httpx.TimeoutException:
+            logger.error("Ollama generation timed out after 120 seconds")
+            return "Query timed out. The LLM is taking too long. Try a simpler query or restart Ollama."
+
+        except httpx.ConnectError:
+            logger.error("Cannot connect to Ollama — is it running?")
+            return "LLM offline. Please ensure Ollama is running: 'ollama serve'"
 
         except Exception as e:
-            logger.error(f"Error communicating with local Ollama service: {e}")
-            raise RuntimeError(
-                f"Local LLM (Ollama) at {self.base_url} is unreachable or returned an error. "
-                "Ensure Ollama is running and the model is pulled."
-            ) from e
+            logger.exception(f"Ollama generation failed: {e}")
+            return f"LLM error: {str(e)}"
 
-    async def get_status(self) -> Dict[str, Any]:
-        """Verify if the Ollama service is reachable and return installed models."""
-        url = f"{self.base_url}/api/tags"
+    async def get_status(self) -> dict:
+        """
+        Check Ollama server status and available models.
+        """
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                response = await client.get(url)
-                if response.status_code == 200:
-                    models_data = response.json().get("models", [])
-                    models = [m["name"] for m in models_data]
-                    # Check if the configured model is installed (could have version suffix like ':latest')
-                    is_model_available = any(
-                        self.model in m or m.startswith(self.model)
-                        for m in models
-                    )
-                    return {
-                        "online": True,
-                        "models": models,
-                        "configured_model": self.model,
-                        "configured_model_available": is_model_available,
-                        "error_detail": None
-                    }
-                else:
-                    return {
-                        "online": False,
-                        "models": [],
-                        "configured_model": self.model,
-                        "configured_model_available": False,
-                        "error_detail": f"Ollama API returned HTTP {response.status_code}"
-                    }
-        except Exception as e:
+            async with httpx.AsyncClient(timeout=STATUS_TIMEOUT) as client:
+                response = await client.get(f"{self.base_url}/api/tags")
+                response.raise_for_status()
+                data   = response.json()
+                models = [m["name"] for m in data.get("models", [])]
+                return {
+                    "online":                    True,
+                    "models":                    models,
+                    "configured_model_available": self.model in models,
+                }
+
+        except httpx.ConnectError:
             return {
-                "online": False,
-                "models": [],
-                "configured_model": self.model,
+                "online":                    False,
+                "models":                    [],
                 "configured_model_available": False,
-                "error_detail": f"Could not reach Ollama at {self.base_url}. Error: {str(e)}"
+            }
+        except Exception as e:
+            logger.warning(f"Ollama status check failed: {e}")
+            return {
+                "online":                    False,
+                "models":                    [],
+                "configured_model_available": False,
             }
 
+
+# Module-level singleton
 ollama_client = OllamaClient()

@@ -1,0 +1,23 @@
+[
+  {
+    "chunk_id": "c4284496-20d5-4873-a5c9-239f0f10b634_chunk_0",
+    "doc_id": "c4284496-20d5-4873-a5c9-239f0f10b634",
+    "filename": "sample_doc.txt",
+    "content": "RADAR COMMUNICATION SYSTEM REPORT\n\n1. Overview\nThis report describes the architecture and operational details of the radar\ncommunication system deployed for surveillance purposes. The system operates\nin the X-band frequency range (8–12 GHz) for reliable data transmission.\n\n2. Encryption Protocols\nAll communication channels are secured using AES-256 encryption. Data packets\nare transmitted using frequency hopping spread spectrum (FHSS) to prevent\ninterception. Authentication is handled via RSA-2048 key exchange.\n\n3. Signal Processing\nThe radar system uses pulse compression techniques to improve range resolution.\nDoppler filtering is applied to distinguish moving targets from stationary clutter.\nSignal-to-noise ratio (SNR) is maintained above 15 dB under normal conditions.",
+    "chunk_index": 0
+  },
+  {
+    "chunk_id": "c4284496-20d5-4873-a5c9-239f0f10b634_chunk_1",
+    "doc_id": "c4284496-20d5-4873-a5c9-239f0f10b634",
+    "filename": "sample_doc.txt",
+    "content": "ing is applied to distinguish moving targets from stationary clutter.\nSignal-to-noise ratio (SNR) is maintained above 15 dB under normal conditions.\n\n4. Monitoring System\nThe operational monitoring system logs all transmission events in real time.\nAlerts are triggered when signal degradation exceeds acceptable thresholds.\nRemote diagnostics are accessible through the secure control interface.\n\n5. Operational Guidelines\nOperators must authenticate using two-factor verification before accessing\nthe control panel. All logs are encrypted and stored locally for 90 days.\nUnauthorized access attempts are automatically reported to the security team.\n\n6. Conclusion\nThe radar communication system provides robust, encrypted, and reliable",
+    "chunk_index": 1
+  },
+  {
+    "chunk_id": "c4284496-20d5-4873-a5c9-239f0f10b634_chunk_2",
+    "doc_id": "c4284496-20d5-4873-a5c9-239f0f10b634",
+    "filename": "sample_doc.txt",
+    "content": "cess attempts are automatically reported to the security team.\n\n6. Conclusion\nThe radar communication system provides robust, encrypted, and reliable\nsurveillance capabilities. Regular maintenance and software updates are\nessential to maintain optimal performance and security compliance.",
+    "chunk_index": 2
+  }
+]

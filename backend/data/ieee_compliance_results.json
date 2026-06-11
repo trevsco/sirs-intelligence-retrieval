@@ -1,0 +1,483 @@
+{
+  "22ce2fbd-7b9d-4ec5-90ec-4bd6360f4a00": {
+    "filename": "drdo_test_paper_tinyllama.pdf",
+    "report": {
+      "timestamp": "2026-06-11T18:29:37.341862",
+      "overall_score_pct": 76.7,
+      "overall_passed": true,
+      "verdict": "COMPLIANT \u2705",
+      "summary": "5/5 IEEE standards passed | Overall score: 76.7% | COMPLIANT \u2705",
+      "standards": [
+        {
+          "id": "IEEE 12207",
+          "name": "Software Life Cycle Processes",
+          "passed": true,
+          "score_pct": 83.3,
+          "checks": {
+            "covers_requirements_phase": false,
+            "covers_design_phase": true,
+            "covers_implementation_phase": true,
+            "covers_testing_phase": true,
+            "covers_deployment_or_maintenance": true,
+            "defines_process_roles": true
+          },
+          "failures": [
+            "Covers requirements phase"
+          ],
+          "suggestions": [
+            "Add requirements documentation to cover the IEEE 12207 acquisition/supply process."
+          ]
+        },
+        {
+          "id": "IEEE 830",
+          "name": "Software Requirements Specifications",
+          "passed": true,
+          "score_pct": 83.3,
+          "checks": {
+            "has_functional_requirements": true,
+            "has_non_functional_requirements": true,
+            "has_scope_or_purpose": true,
+            "has_measurable_criteria": true,
+            "has_traceability_indicators": false,
+            "has_constraints_or_assumptions": true
+          },
+          "failures": [
+            "Has traceability indicators"
+          ],
+          "suggestions": [
+            "Add requirement IDs (REQ-01, FR-01) for full traceability per IEEE 830 \u00a74.3."
+          ]
+        },
+        {
+          "id": "IEEE 829",
+          "name": "Software Test Documentation",
+          "passed": true,
+          "score_pct": 66.7,
+          "checks": {
+            "has_test_plan_or_cases": true,
+            "has_expected_results": true,
+            "has_test_types_defined": false,
+            "has_pass_fail_criteria": true,
+            "has_test_coverage": false,
+            "has_test_environment_or_tools": true
+          },
+          "failures": [
+            "Has test types defined",
+            "Has test coverage"
+          ],
+          "suggestions": [
+            "Include edge cases and boundary tests per IEEE 829 \u00a77.",
+            "Define the types of tests (unit, integration, system) per IEEE 829 \u00a74."
+          ]
+        },
+        {
+          "id": "IEEE 1016",
+          "name": "Software Design Description",
+          "passed": true,
+          "score_pct": 83.3,
+          "checks": {
+            "has_architecture_description": true,
+            "has_interface_description": true,
+            "has_data_design": true,
+            "has_component_descriptions": true,
+            "has_design_rationale": false,
+            "has_diagrams_or_models": true
+          },
+          "failures": [
+            "Has design rationale"
+          ],
+          "suggestions": [
+            "Document design decisions and rationale (why FAISS, why Ollama) per IEEE 1016 \u00a75.5."
+          ]
+        },
+        {
+          "id": "IEEE 730",
+          "name": "Software Quality Assurance",
+          "passed": true,
+          "score_pct": 66.7,
+          "checks": {
+            "has_quality_objectives": false,
+            "has_review_process": false,
+            "has_metrics_defined": true,
+            "has_defect_tracking": true,
+            "has_standards_compliance_mention": true,
+            "has_security_or_access_control": true
+          },
+          "failures": [
+            "Has quality objectives",
+            "Has review process"
+          ],
+          "suggestions": [
+            "Document the code review and QA process per IEEE 730 \u00a74.2."
+          ]
+        }
+      ]
+    }
+  },
+  "1fce750a-66fb-443b-9dff-64edfa053a47": {
+    "filename": "drdo_test_paper_tinyllama.pdf",
+    "report": {
+      "timestamp": "2026-06-11T18:29:55.532652",
+      "overall_score_pct": 76.7,
+      "overall_passed": true,
+      "verdict": "COMPLIANT \u2705",
+      "summary": "5/5 IEEE standards passed | Overall score: 76.7% | COMPLIANT \u2705",
+      "standards": [
+        {
+          "id": "IEEE 12207",
+          "name": "Software Life Cycle Processes",
+          "passed": true,
+          "score_pct": 83.3,
+          "checks": {
+            "covers_requirements_phase": false,
+            "covers_design_phase": true,
+            "covers_implementation_phase": true,
+            "covers_testing_phase": true,
+            "covers_deployment_or_maintenance": true,
+            "defines_process_roles": true
+          },
+          "failures": [
+            "Covers requirements phase"
+          ],
+          "suggestions": [
+            "Add requirements documentation to cover the IEEE 12207 acquisition/supply process."
+          ]
+        },
+        {
+          "id": "IEEE 830",
+          "name": "Software Requirements Specifications",
+          "passed": true,
+          "score_pct": 83.3,
+          "checks": {
+            "has_functional_requirements": true,
+            "has_non_functional_requirements": true,
+            "has_scope_or_purpose": true,
+            "has_measurable_criteria": true,
+            "has_traceability_indicators": false,
+            "has_constraints_or_assumptions": true
+          },
+          "failures": [
+            "Has traceability indicators"
+          ],
+          "suggestions": [
+            "Add requirement IDs (REQ-01, FR-01) for full traceability per IEEE 830 \u00a74.3."
+          ]
+        },
+        {
+          "id": "IEEE 829",
+          "name": "Software Test Documentation",
+          "passed": true,
+          "score_pct": 66.7,
+          "checks": {
+            "has_test_plan_or_cases": true,
+            "has_expected_results": true,
+            "has_test_types_defined": false,
+            "has_pass_fail_criteria": true,
+            "has_test_coverage": false,
+            "has_test_environment_or_tools": true
+          },
+          "failures": [
+            "Has test types defined",
+            "Has test coverage"
+          ],
+          "suggestions": [
+            "Include edge cases and boundary tests per IEEE 829 \u00a77.",
+            "Define the types of tests (unit, integration, system) per IEEE 829 \u00a74."
+          ]
+        },
+        {
+          "id": "IEEE 1016",
+          "name": "Software Design Description",
+          "passed": true,
+          "score_pct": 83.3,
+          "checks": {
+            "has_architecture_description": true,
+            "has_interface_description": true,
+            "has_data_design": true,
+            "has_component_descriptions": true,
+            "has_design_rationale": false,
+            "has_diagrams_or_models": true
+          },
+          "failures": [
+            "Has design rationale"
+          ],
+          "suggestions": [
+            "Document design decisions and rationale (why FAISS, why Ollama) per IEEE 1016 \u00a75.5."
+          ]
+        },
+        {
+          "id": "IEEE 730",
+          "name": "Software Quality Assurance",
+          "passed": true,
+          "score_pct": 66.7,
+          "checks": {
+            "has_quality_objectives": false,
+            "has_review_process": false,
+            "has_metrics_defined": true,
+            "has_defect_tracking": true,
+            "has_standards_compliance_mention": true,
+            "has_security_or_access_control": true
+          },
+          "failures": [
+            "Has quality objectives",
+            "Has review process"
+          ],
+          "suggestions": [
+            "Document the code review and QA process per IEEE 730 \u00a74.2."
+          ]
+        }
+      ]
+    }
+  },
+  "6cbaf510-0344-465b-a737-52dc6074c256": {
+    "filename": "Selection of Local LLM.pdf",
+    "report": {
+      "timestamp": "2026-06-11T18:30:06.981397",
+      "overall_score_pct": 60.0,
+      "overall_passed": true,
+      "verdict": "COMPLIANT \u2705",
+      "summary": "5/5 IEEE standards passed | Overall score: 60.0% | COMPLIANT \u2705",
+      "standards": [
+        {
+          "id": "IEEE 12207",
+          "name": "Software Life Cycle Processes",
+          "passed": true,
+          "score_pct": 66.7,
+          "checks": {
+            "covers_requirements_phase": true,
+            "covers_design_phase": true,
+            "covers_implementation_phase": true,
+            "covers_testing_phase": false,
+            "covers_deployment_or_maintenance": true,
+            "defines_process_roles": false
+          },
+          "failures": [
+            "Covers testing phase",
+            "Defines process roles"
+          ],
+          "suggestions": [
+            "Include a verification/validation process as required by IEEE 12207 \u00a76.4."
+          ]
+        },
+        {
+          "id": "IEEE 830",
+          "name": "Software Requirements Specifications",
+          "passed": true,
+          "score_pct": 50.0,
+          "checks": {
+            "has_functional_requirements": false,
+            "has_non_functional_requirements": true,
+            "has_scope_or_purpose": false,
+            "has_measurable_criteria": true,
+            "has_traceability_indicators": false,
+            "has_constraints_or_assumptions": true
+          },
+          "failures": [
+            "Has functional requirements",
+            "Has scope or purpose",
+            "Has traceability indicators"
+          ],
+          "suggestions": [
+            "Add requirement IDs (REQ-01, FR-01) for full traceability per IEEE 830 \u00a74.3."
+          ]
+        },
+        {
+          "id": "IEEE 829",
+          "name": "Software Test Documentation",
+          "passed": true,
+          "score_pct": 50.0,
+          "checks": {
+            "has_test_plan_or_cases": false,
+            "has_expected_results": false,
+            "has_test_types_defined": true,
+            "has_pass_fail_criteria": true,
+            "has_test_coverage": false,
+            "has_test_environment_or_tools": true
+          },
+          "failures": [
+            "Has test plan or cases",
+            "Has expected results",
+            "Has test coverage"
+          ],
+          "suggestions": [
+            "Add structured test cases with IDs (TC-01, TC-02) per IEEE 829 \u00a75.",
+            "Include edge cases and boundary tests per IEEE 829 \u00a77."
+          ]
+        },
+        {
+          "id": "IEEE 1016",
+          "name": "Software Design Description",
+          "passed": true,
+          "score_pct": 66.7,
+          "checks": {
+            "has_architecture_description": false,
+            "has_interface_description": true,
+            "has_data_design": true,
+            "has_component_descriptions": true,
+            "has_design_rationale": true,
+            "has_diagrams_or_models": false
+          },
+          "failures": [
+            "Has architecture description",
+            "Has diagrams or models"
+          ],
+          "suggestions": [
+            "Include architecture/UML diagrams in design docs per IEEE 1016 \u00a75.4."
+          ]
+        },
+        {
+          "id": "IEEE 730",
+          "name": "Software Quality Assurance",
+          "passed": true,
+          "score_pct": 66.7,
+          "checks": {
+            "has_quality_objectives": false,
+            "has_review_process": false,
+            "has_metrics_defined": true,
+            "has_defect_tracking": true,
+            "has_standards_compliance_mention": true,
+            "has_security_or_access_control": true
+          },
+          "failures": [
+            "Has quality objectives",
+            "Has review process"
+          ],
+          "suggestions": [
+            "Document the code review and QA process per IEEE 730 \u00a74.2."
+          ]
+        }
+      ]
+    }
+  },
+  "c4284496-20d5-4873-a5c9-239f0f10b634": {
+    "filename": "sample_doc.txt",
+    "report": {
+      "timestamp": "2026-06-11T19:29:45.906187",
+      "overall_score_pct": 40.0,
+      "overall_passed": false,
+      "verdict": "NEEDS IMPROVEMENT \u26a0\ufe0f",
+      "summary": "3/5 IEEE standards passed | Overall score: 40.0% | NEEDS IMPROVEMENT \u26a0\ufe0f",
+      "standards": [
+        {
+          "id": "IEEE 12207",
+          "name": "Software Life Cycle Processes",
+          "passed": true,
+          "score_pct": 66.7,
+          "checks": {
+            "covers_requirements_phase": false,
+            "covers_design_phase": true,
+            "covers_implementation_phase": false,
+            "covers_testing_phase": true,
+            "covers_deployment_or_maintenance": true,
+            "defines_process_roles": true
+          },
+          "failures": [
+            "Covers requirements phase",
+            "Covers implementation phase"
+          ],
+          "suggestions": [
+            "Add requirements documentation to cover the IEEE 12207 acquisition/supply process."
+          ]
+        },
+        {
+          "id": "IEEE 830",
+          "name": "Software Requirements Specifications",
+          "passed": true,
+          "score_pct": 50.0,
+          "checks": {
+            "has_functional_requirements": true,
+            "has_non_functional_requirements": true,
+            "has_scope_or_purpose": true,
+            "has_measurable_criteria": false,
+            "has_traceability_indicators": false,
+            "has_constraints_or_assumptions": false
+          },
+          "failures": [
+            "Has measurable criteria",
+            "Has traceability indicators",
+            "Has constraints or assumptions"
+          ],
+          "suggestions": [
+            "Add measurable acceptance criteria (e.g., 'response < 200 ms') per IEEE 830 \u00a75.3.",
+            "Add requirement IDs (REQ-01, FR-01) for full traceability per IEEE 830 \u00a74.3.",
+            "Document constraints and assumptions (e.g., offline-only, Python 3.x) per IEEE 830."
+          ]
+        },
+        {
+          "id": "IEEE 829",
+          "name": "Software Test Documentation",
+          "passed": false,
+          "score_pct": 0.0,
+          "checks": {
+            "has_test_plan_or_cases": false,
+            "has_expected_results": false,
+            "has_test_types_defined": false,
+            "has_pass_fail_criteria": false,
+            "has_test_coverage": false,
+            "has_test_environment_or_tools": false
+          },
+          "failures": [
+            "Has test plan or cases",
+            "Has expected results",
+            "Has test types defined",
+            "Has pass fail criteria",
+            "Has test coverage",
+            "Has test environment or tools"
+          ],
+          "suggestions": [
+            "Add structured test cases with IDs (TC-01, TC-02) per IEEE 829 \u00a75.",
+            "Include edge cases and boundary tests per IEEE 829 \u00a77.",
+            "Define the types of tests (unit, integration, system) per IEEE 829 \u00a74."
+          ]
+        },
+        {
+          "id": "IEEE 1016",
+          "name": "Software Design Description",
+          "passed": true,
+          "score_pct": 50.0,
+          "checks": {
+            "has_architecture_description": true,
+            "has_interface_description": true,
+            "has_data_design": true,
+            "has_component_descriptions": false,
+            "has_design_rationale": false,
+            "has_diagrams_or_models": false
+          },
+          "failures": [
+            "Has component descriptions",
+            "Has design rationale",
+            "Has diagrams or models"
+          ],
+          "suggestions": [
+            "Include architecture/UML diagrams in design docs per IEEE 1016 \u00a75.4.",
+            "Document design decisions and rationale (why FAISS, why Ollama) per IEEE 1016 \u00a75.5."
+          ]
+        },
+        {
+          "id": "IEEE 730",
+          "name": "Software Quality Assurance",
+          "passed": false,
+          "score_pct": 33.3,
+          "checks": {
+            "has_quality_objectives": false,
+            "has_review_process": false,
+            "has_metrics_defined": false,
+            "has_defect_tracking": false,
+            "has_standards_compliance_mention": true,
+            "has_security_or_access_control": true
+          },
+          "failures": [
+            "Has quality objectives",
+            "Has review process",
+            "Has metrics defined",
+            "Has defect tracking"
+          ],
+          "suggestions": [
+            "Define quality metrics (retrieval accuracy, latency, recall) per IEEE 730 \u00a74.4.",
+            "Document the code review and QA process per IEEE 730 \u00a74.2."
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -3,6 +3,10 @@ from loguru import logger
 from config import settings
 from retrieval.vector_store import vector_store
 
+# ── FIX 1: Import the embedding model so we can vectorize the query ──
+from retrieval.embeddings import embedding_model
+# ─────────────────────────────────────────────────────────────────────
+
 class RAGPipeline:
     @staticmethod
     def run(
@@ -19,8 +23,13 @@ class RAGPipeline:
         """
         logger.info(f"Running RAG pipeline for query: '{query}', top_k: {top_k}, threshold: {threshold}")
         
-        # Default similarity threshold from config
-        results = vector_store.search(query, top_k=top_k, threshold=threshold)
+        # ── FIX 1: Convert the text query into a mathematical vector ──
+        # We use encode_batch here because we know from vector_store.py that this method exists
+        query_vector = embedding_model.encode_batch([query])[0]
+        
+        # Now we pass the vector to FAISS, not the string!
+        results = vector_store.search(query_vector, top_k=top_k, threshold=threshold)
+        # ─────────────────────────────────────────────────────────────
         
         if not results:
             logger.info("No matching chunks found in FAISS vector store.")
@@ -39,7 +48,13 @@ class RAGPipeline:
         for res in results:
             chunks.append(res)
             sources.add(res["filename"])
-            context_elements.append(res["text"])
+            
+            # ── FIX 2: Use "content" to match the vector_store metadata ──
+            # We use .get() just to be absolutely safe
+            chunk_text = res.get("content") or res.get("text") or ""
+            context_elements.append(chunk_text)
+            # ─────────────────────────────────────────────────────────────
+            
             scores.append(res["score"])
             
         # Join chunks together with high visual separation for LLM context reading

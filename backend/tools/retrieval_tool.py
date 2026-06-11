@@ -6,7 +6,7 @@ from retrieval.rag_pipeline import rag_pipeline
 from config import settings
 
 @tool_registry.register(
-    tool_name="retrieve_documents",
+    tool_name="retrieval_tool",
     action="search",
     description="Search the local FAISS vector database to retrieve intelligence segments matching a query.",
     schema={
@@ -48,7 +48,7 @@ async def retrieve_documents(
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
         return MCPResponse.make_success(
             message_id=msg_id,
-            tool_name="retrieve_documents",
+            tool_name="retrieval_tool",
             action="search",
             data=result,
             execution_time_ms=elapsed_ms
@@ -57,7 +57,7 @@ async def retrieve_documents(
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
         return MCPResponse.make_error(
             message_id=msg_id,
-            tool_name="retrieve_documents",
+            tool_name="retrieval_tool",
             action="search",
             error_detail=f"Retrieval tool error: {str(e)}",
             execution_time_ms=elapsed_ms

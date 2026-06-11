@@ -95,21 +95,34 @@ async def ingest_document(file_path: str, filename: str, doc_id: str) -> MCPResp
         # ─────────────────────────────────────────────────────────────────────
             
         # 2. Chunk Text
-        chunks = DocumentChunker.chunk_text(
+        raw_chunks = DocumentChunker.chunk_text(
             text=text, 
             chunk_size=settings.CHUNK_SIZE, 
             chunk_overlap=settings.CHUNK_OVERLAP
         )
         
-        # 3. Add to FAISS and embed
-        vector_store.add_chunks(chunks=chunks, doc_id=doc_id, filename=filename)
+        # ── FIX: Extract text strings from dictionaries ──
+        clean_chunks = []
+        for c in raw_chunks:
+            if isinstance(c, dict):
+                # Pull the text using common dictionary keys
+                chunk_text = c.get("text") or c.get("content") or c.get("page_content")
+                if not chunk_text:
+                    chunk_text = str(c) # Fallback if no known key exists
+                clean_chunks.append(chunk_text)
+            else:
+                clean_chunks.append(str(c))
+        # ─────────────────────────────────────────────────
+        
+        # 3. Add to FAISS and embed using the cleaned text strings
+        vector_store.add_chunks(chunks=clean_chunks, doc_id=doc_id, filename=filename)
         
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
         
         result_data = {
             "doc_id": doc_id,
             "filename": filename,
-            "chunk_count": len(chunks),
+            "chunk_count": len(clean_chunks),
             "total_characters": len(text),
             "status": "fully_indexed",
             # ── NEW: include compliance summary in upload response ────────────
