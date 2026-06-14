@@ -128,7 +128,7 @@ class StandardsVectorStore:
             ).astype(np.float32)
 
             # Search — fetch more if we need to filter afterwards
-            fetch_k = top_k * 3 if standard_filter else top_k
+            fetch_k = min(top_k * 50, self._index.ntotal) if standard_filter else top_k
             fetch_k = min(fetch_k, self._index.ntotal)
 
             distances, indices = self._index.search(query_vec, fetch_k)

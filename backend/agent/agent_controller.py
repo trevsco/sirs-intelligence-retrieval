@@ -36,7 +36,7 @@ class AgentController:
     async def handle_query(
         self,
         query:     str,
-        top_k:     int   = 7,
+        top_k:     int   = 3,
         threshold: float = 0.0,
     ) -> dict:
         """
@@ -110,7 +110,7 @@ class AgentController:
                 "Please upload relevant documents first, then try again."
             )
         else:
-            answer = await ollama_client.generate(query=query, context=context)
+            answer = await ollama_client.generate(query=query, context=context[:1500])
 
         llm_ms = (time.perf_counter() - llm_start) * 1000
         tool_trace.append({
@@ -126,8 +126,9 @@ class AgentController:
         # Richer content → better clause matching in the standards index
         compliance_report = None
         compliance_status = "SKIPPED"
+        compliance_ms = 0
 
-        if chunks and answer:
+        if chunks and answer and "timed out" not in answer.lower():
             compliance_start = time.perf_counter()
             try:
                 # Combine answer with context for richer compliance signal

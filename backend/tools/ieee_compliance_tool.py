@@ -31,16 +31,12 @@ from datetime import datetime
 from loguru import logger
 
 
-# ─────────────────────────────────────────────
-#  Data classes  (API response shape unchanged)
-# ─────────────────────────────────────────────
-
 @dataclass
 class StandardResult:
     standard_id:   str
     standard_name: str
     passed:        bool
-    score:         float          # 0.0 – 1.0
+    score:         float
     checks:        Dict[str, bool]
     failures:      List[str]
     suggestions:   List[str]
@@ -49,7 +45,7 @@ class StandardResult:
 @dataclass
 class ComplianceReport:
     timestamp:      str
-    overall_score:  float         # 0.0 – 1.0
+    overall_score:  float
     overall_passed: bool
     standards:      List[StandardResult]
     summary:        str
@@ -77,20 +73,13 @@ class ComplianceReport:
         }
 
 
-# ─────────────────────────────────────────────
-#  Checker class
-# ─────────────────────────────────────────────
-
 class IEEEComplianceChecker:
 
     PASS_THRESHOLD = 0.5
 
     def __init__(self):
-        # Lazy-loaded to avoid circular imports at module level
         self._store  = None
         self._ollama = None
-
-    # ── Lazy getters ──────────────────────────────────────────────────────────
 
     def _get_store(self):
         if self._store is None:
@@ -103,10 +92,6 @@ class IEEEComplianceChecker:
             from llm.ollama_client import OllamaClient
             self._ollama = OllamaClient()
         return self._ollama
-
-    # =========================================================================
-    #  KEYWORD CHECKS  (IEEE 12207 and IEEE 730 — no PDFs provided)
-    # =========================================================================
 
     def check_ieee_12207(self, content: str) -> StandardResult:
         """IEEE 12207: Software Life Cycle Processes — keyword match."""
@@ -183,10 +168,6 @@ class IEEEComplianceChecker:
             passed=score >= self.PASS_THRESHOLD,
             score=score, checks=checks, failures=failures, suggestions=suggestions,
         )
-
-    # =========================================================================
-    #  KEYWORD FALLBACKS  (used when RAG/LLM fails for 830, 829, 1016)
-    # =========================================================================
 
     def _keyword_830(self, content: str) -> StandardResult:
         c = content.lower()
@@ -265,16 +246,12 @@ class IEEEComplianceChecker:
             score=score, checks=checks, failures=failures, suggestions=[],
         )
 
-    # =========================================================================
-    #  RAG + LLM CHECK  (core of the upgrade)
-    # =========================================================================
-
     async def _check_standard_rag(
         self,
         content:       str,
         standard_id:   str,
         standard_name: str,
-        fallback_fn,               # keyword fallback callable
+        fallback_fn,
     ) -> StandardResult:
         """
         RAG-based compliance check for one IEEE standard:
@@ -285,7 +262,6 @@ class IEEEComplianceChecker:
         """
         store = self._get_store()
 
-        # ── Guard: store not ready ────────────────────────────────────────────
         if not store.is_ready:
             logger.warning(
                 f"[IEEECompliance] Standards index not ready — "
@@ -293,7 +269,6 @@ class IEEEComplianceChecker:
             )
             return fallback_fn(content)
 
-        # ── Retrieve clauses ──────────────────────────────────────────────────
         clauses = store.query(content, top_k=3, standard_filter=standard_id)
         if not clauses:
             logger.warning(
@@ -301,16 +276,12 @@ class IEEEComplianceChecker:
             )
             return fallback_fn(content)
 
-        # ── Build clause block (keep short for phi4-mini) ─────────────────────
         clause_lines = []
         for i, cl in enumerate(clauses, 1):
             clause_lines.append(f"Clause {i} (page {cl['page']}): {cl['text'][:280]}")
         clause_block   = "\n".join(clause_lines)
         content_snippet = content[:500].strip()
 
-        # ── Prompt ────────────────────────────────────────────────────────────
-        # query → instruction; context → all the data
-        # Kept intentionally short — phi4-mini drifts on long prompts
         llm_query = (
             f"You are an IEEE compliance evaluator for {standard_id}. "
             f"Reply ONLY with valid JSON — no markdown, no explanation."
@@ -325,9 +296,8 @@ class IEEEComplianceChecker:
             f'"missing": "what is missing or none"}}'
         )
 
-        # ── LLM call ─────────────────────────────────────────────────────────
         try:
-            ollama      = self._get_ollama()
+            ollama       = self._get_ollama()
             raw_response = await ollama.generate(query=llm_query, context=llm_context)
             result       = self._parse_llm_json(raw_response, standard_id, standard_name, clauses)
             logger.info(
@@ -342,8 +312,6 @@ class IEEEComplianceChecker:
             )
             return fallback_fn(content)
 
-    # ── JSON Parser ───────────────────────────────────────────────────────────
-
     def _parse_llm_json(
         self,
         raw:           str,
@@ -357,9 +325,7 @@ class IEEEComplianceChecker:
         """
         try:
             cleaned = raw.strip()
-            # Strip ```json ... ``` fences if phi4-mini adds them
             cleaned = re.sub(r"```json|```", "", cleaned).strip()
-            # Extract first JSON object even if there's prose around it
             match = re.search(r'\{.*?\}', cleaned, re.DOTALL)
             if not match:
                 raise ValueError(f"No JSON object in response: {cleaned[:150]}")
@@ -367,17 +333,14 @@ class IEEEComplianceChecker:
             data    = json.loads(match.group())
             passed  = bool(data.get("passed", False))
             score   = float(data.get("score", 0.5))
-            score   = max(0.0, min(1.0, score))          # clamp to [0, 1]
+            score = float(data.get("score") or 0.5)
             reason  = str(data.get("reason", ""))
             missing = str(data.get("missing", "none"))
 
-            # Build a checks dict using clause page numbers as keys
             checks: Dict[str, bool] = {}
             for i, cl in enumerate(clauses, 1):
                 key          = f"clause_page_{cl['page']}_satisfied"
-                # First clause drives pass/fail; subsequent use score threshold
                 checks[key]  = passed if i == 1 else (score >= 0.6)
-            # Record which pages were cited — visible in frontend
             checks["cited_pages"] = (
                 f"IEEE standard pages: {', '.join(str(c['page']) for c in clauses)}"
             )
@@ -407,7 +370,6 @@ class IEEEComplianceChecker:
                 f"[IEEECompliance] Parse error for {standard_id}: {e} | "
                 f"raw[:200]={raw[:200]}"
             )
-            # Neutral fallback — doesn't crash the pipeline
             return StandardResult(
                 standard_id=standard_id,
                 standard_name=standard_name,
@@ -420,32 +382,27 @@ class IEEEComplianceChecker:
                 ],
             )
 
-    # =========================================================================
-    #  MASTER RUNNER
-    # =========================================================================
-
     async def run_full_compliance_check(self, content: str) -> ComplianceReport:
         """
         Run all 5 IEEE checks and return a ComplianceReport.
 
         IEEE 12207, 730 → synchronous keyword match
-        IEEE 830, 829, 1016 → async RAG + phi4-mini (concurrent via asyncio.gather)
+        IEEE 830, 829, 1016 → async RAG + phi4-mini (sequentially)
         """
         if not content or not content.strip():
             raise ValueError("Content cannot be empty for IEEE compliance check.")
 
-        # ── Keyword checks (sync, instant) ────────────────────────────────────
         result_12207 = self.check_ieee_12207(content)
         result_730   = self.check_ieee_730(content)
 
-        # ── RAG checks (async, run concurrently) ──────────────────────────────
-        result_830, result_829, result_1016 = await asyncio.gather(
-            self._check_standard_rag(
-                content, "IEEE 830", "Software Requirements Specifications", self._keyword_830),
-            self._check_standard_rag(
-                content, "IEEE 829", "Software Test Documentation", self._keyword_829),
-            self._check_standard_rag(
-                content, "IEEE 1016", "Software Design Description", self._keyword_1016),
+        result_830 = await self._check_standard_rag(
+            content, "IEEE 830", "Software Requirements Specifications", self._keyword_830
+        )
+        result_829 = await self._check_standard_rag(
+            content, "IEEE 829", "Software Test Documentation", self._keyword_829
+        )
+        result_1016 = await self._check_standard_rag(
+            content, "IEEE 1016", "Software Design Description", self._keyword_1016
         )
 
         results        = [result_12207, result_830, result_829, result_1016, result_730]
@@ -469,11 +426,7 @@ class IEEEComplianceChecker:
         )
 
 
-# ─────────────────────────────────────────────
-#  Public API
-# ─────────────────────────────────────────────
-
-_checker = IEEEComplianceChecker()   # module-level singleton
+_checker = IEEEComplianceChecker()
 
 
 async def check_compliance(content: str) -> dict:

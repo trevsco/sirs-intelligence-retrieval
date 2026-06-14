@@ -349,14 +349,14 @@
       ]
     }
   },
-  "19e48240-06b2-4626-a80d-7c1968140738": {
+  "9fcdbb6e-ead3-48e8-9e30-8639918d508d": {
     "filename": "drdo_test_paper_tinyllama.pdf",
     "report": {
-      "timestamp": "2026-06-13T19:56:48.437762",
-      "overall_score_pct": 66.7,
+      "timestamp": "2026-06-14T17:53:02.075530",
+      "overall_score_pct": 60.0,
       "overall_passed": false,
       "verdict": "NEEDS IMPROVEMENT \u26a0\ufe0f",
-      "summary": "3/5 IEEE standards passed | Overall score: 66.7% | NEEDS IMPROVEMENT \u26a0\ufe0f | RAG-verified: IEEE 830, 829, 1016",
+      "summary": "2/5 IEEE standards passed | Overall score: 60.0% | NEEDS IMPROVEMENT \u26a0\ufe0f | RAG-verified: IEEE 830, 829, 1016",
       "standards": [
         {
           "id": "IEEE 12207",
@@ -381,20 +381,17 @@
         {
           "id": "IEEE 830",
           "name": "Software Requirements Specifications",
-          "passed": true,
-          "score_pct": 83.3,
+          "passed": false,
+          "score_pct": 50.0,
           "checks": {
-            "has_functional_requirements": true,
-            "has_non_functional_requirements": true,
-            "has_scope_or_purpose": true,
-            "has_measurable_criteria": true,
-            "has_traceability_indicators": false,
-            "has_constraints_or_assumptions": true
+            "rag_parse_error": false
           },
           "failures": [
-            "Has traceability indicators"
+            "LLM response could not be parsed"
           ],
-          "suggestions": []
+          "suggestions": [
+            "Manually verify content against IEEE 830 \u2014 Software Requirements Specifications."
+          ]
         },
         {
           "id": "IEEE 829",
