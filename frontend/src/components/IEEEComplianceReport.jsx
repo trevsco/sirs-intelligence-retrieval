@@ -3,129 +3,169 @@
  * -------------------------
  * React component to display IEEE Compliance Check results in the SIRS dashboard.
  *
+ * v2 Changes:
+ *   - CheckList now handles RAG clause keys (clause_page_X_satisfied)
+ *   - cited_pages rendered as citation reference box, not a checkbox
+ *   - RAG Verified badge shown on IEEE 830, 829, 1016
+ *   - rag_parse_error rendered as a warning, not a broken checkbox
+ *
  * Props:
  *   report  — the compliance_report object from /query or /compliance/check API response
  *   loading — boolean, shows skeleton while compliance check is running
- *
- * Usage in your existing Dashboard/QueryResult component:
- *   import IEEEComplianceReport from './IEEEComplianceReport';
- *   <IEEEComplianceReport report={queryResult.compliance_report} loading={isLoading} />
  */
 
 import { useState } from "react";
 
 const STANDARD_COLORS = {
-  "IEEE 12207": { bg: "#1a2744", accent: "#4da6ff", label: "Life Cycle" },
-  "IEEE 830":   { bg: "#1a2e1a", accent: "#4caf82", label: "Requirements" },
-  "IEEE 829":   { bg: "#2e2414", accent: "#f0a045", label: "Testing" },
-  "IEEE 1016":  { bg: "#2a1a2e", accent: "#b07aff", label: "Design" },
-  "IEEE 730":   { bg: "#1a2a2e", accent: "#4dd9dc", label: "Quality" },
+  "IEEE 12207": { bg: "#1a2744", accent: "#4da6ff", label: "Life Cycle"    },
+  "IEEE 830":   { bg: "#1a2e1a", accent: "#4caf82", label: "Requirements"  },
+  "IEEE 829":   { bg: "#2e2414", accent: "#f0a045", label: "Testing"       },
+  "IEEE 1016":  { bg: "#2a1a2e", accent: "#b07aff", label: "Design"        },
+  "IEEE 730":   { bg: "#1a2a2e", accent: "#4dd9dc", label: "Quality"       },
 };
 
+// Standards that use RAG + LLM verification against real PDFs
+const RAG_VERIFIED = new Set(["IEEE 830", "IEEE 829", "IEEE 1016"]);
+
+// ── Score bar ─────────────────────────────────────────────────────────────────
 function ScoreBar({ score, accent }) {
   return (
     <div style={{
-      height: 6,
-      borderRadius: 3,
+      height: 6, borderRadius: 3,
       background: "rgba(255,255,255,0.08)",
-      overflow: "hidden",
-      marginTop: 8,
+      overflow: "hidden", marginTop: 8,
     }}>
       <div style={{
-        height: "100%",
-        width: `${score}%`,
-        borderRadius: 3,
-        background: accent,
-        transition: "width 0.6s ease",
+        height: "100%", width: `${score}%`, borderRadius: 3,
+        background: accent, transition: "width 0.6s ease",
       }} />
     </div>
   );
 }
 
-function CheckList({ checks, failures }) {
+// ── Check list — handles both keyword keys and RAG clause keys ────────────────
+function CheckList({ checks }) {
+  // Separate the cited_pages string from actual boolean checks
+  const citedPages    = checks["cited_pages"] || null;
+  const parseError    = "rag_parse_error" in checks;
+
+  const booleanChecks = Object.entries(checks).filter(
+    ([key]) => key !== "cited_pages" && key !== "rag_parse_error"
+  );
+
+  // Format a check key into readable text
+  const formatKey = (key) => {
+    // RAG clause key: clause_page_12_satisfied → Clause (page 12)
+    const clauseMatch = key.match(/^clause_page_(\d+)_satisfied$/);
+    if (clauseMatch) return `Clause (page ${clauseMatch[1]})`;
+    // Keyword key: has_functional_requirements → Has functional requirements
+    return key.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
+  };
+
   return (
     <div style={{ marginTop: 12 }}>
-      {Object.entries(checks).map(([key, passed]) => (
+
+      {/* Parse error warning */}
+      {parseError && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "6px 10px", borderRadius: 6, marginBottom: 8,
+          background: "rgba(255,160,0,0.1)",
+          border: "1px solid rgba(255,160,0,0.25)",
+          fontSize: 12, color: "rgba(255,200,80,0.85)",
+        }}>
+          ⚠ LLM response could not be parsed — keyword fallback used
+        </div>
+      )}
+
+      {/* Boolean checks */}
+      {booleanChecks.map(([key, passed]) => (
         <div key={key} style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "3px 0",
-          fontSize: 12,
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "3px 0", fontSize: 12,
           color: passed ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.35)",
         }}>
           <span style={{
-            width: 16,
-            height: 16,
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 10,
-            flexShrink: 0,
+            width: 16, height: 16, borderRadius: "50%",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 10, flexShrink: 0,
             background: passed ? "rgba(78,200,140,0.2)" : "rgba(255,80,80,0.15)",
-            color: passed ? "#4ec88c" : "#ff5a5a",
-            fontWeight: 600,
+            color: passed ? "#4ec88c" : "#ff5a5a", fontWeight: 600,
           }}>
             {passed ? "✓" : "✗"}
           </span>
-          {key.replace(/_/g, " ")}
+          {formatKey(key)}
         </div>
       ))}
+
+      {/* Cited pages — shown as a reference box, not a checkbox */}
+      {citedPages && (
+        <div style={{
+          marginTop: 10, padding: "6px 10px", borderRadius: 6,
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          fontSize: 11, color: "rgba(255,255,255,0.35)",
+          fontStyle: "italic",
+        }}>
+          📄 {citedPages}
+        </div>
+      )}
     </div>
   );
 }
 
+// ── Individual standard card ───────────────────────────────────────────────────
 function StandardCard({ standard, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen || false);
-  const colors = STANDARD_COLORS[standard.id] || { bg: "#1a1f2e", accent: "#4da6ff", label: "" };
-  const passed = standard.passed;
+  const colors  = STANDARD_COLORS[standard.id] || { bg: "#1a1f2e", accent: "#4da6ff", label: "" };
+  const passed  = standard.passed;
+  const isRag   = RAG_VERIFIED.has(standard.id);
 
   return (
     <div style={{
       background: colors.bg,
       border: `1px solid ${passed ? colors.accent + "44" : "rgba(255,80,80,0.25)"}`,
-      borderRadius: 10,
-      overflow: "hidden",
-      transition: "border-color 0.2s",
+      borderRadius: 10, overflow: "hidden", transition: "border-color 0.2s",
     }}>
       {/* Card header */}
       <div
         onClick={() => setOpen(!open)}
         style={{
-          padding: "12px 16px",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          userSelect: "none",
+          padding: "12px 16px", cursor: "pointer",
+          display: "flex", alignItems: "center", gap: 12, userSelect: "none",
         }}
       >
         {/* Status dot */}
         <div style={{
-          width: 10,
-          height: 10,
-          borderRadius: "50%",
-          background: passed ? "#4ec88c" : "#ff5a5a",
-          flexShrink: 0,
+          width: 10, height: 10, borderRadius: "50%",
+          background: passed ? "#4ec88c" : "#ff5a5a", flexShrink: 0,
           boxShadow: passed ? "0 0 6px #4ec88c88" : "0 0 6px #ff5a5a88",
         }} />
 
         {/* Title area */}
         <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: colors.accent }}>
               {standard.id}
             </span>
+            {/* Category label */}
             <span style={{
-              fontSize: 11,
-              background: colors.accent + "22",
-              color: colors.accent,
-              borderRadius: 4,
-              padding: "1px 6px",
+              fontSize: 11, background: colors.accent + "22", color: colors.accent,
+              borderRadius: 4, padding: "1px 6px",
             }}>
               {colors.label}
             </span>
+            {/* RAG Verified badge — only for 830, 829, 1016 */}
+            {isRag && (
+              <span style={{
+                fontSize: 10, background: "rgba(100,200,255,0.12)",
+                color: "rgba(120,210,255,0.8)",
+                border: "1px solid rgba(100,200,255,0.2)",
+                borderRadius: 4, padding: "1px 6px", letterSpacing: "0.03em",
+              }}>
+                RAG Verified
+              </span>
+            )}
           </div>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 1 }}>
             {standard.name}
@@ -135,8 +175,7 @@ function StandardCard({ standard, defaultOpen }) {
         {/* Score badge */}
         <div style={{ textAlign: "right", minWidth: 48 }}>
           <div style={{
-            fontSize: 18,
-            fontWeight: 700,
+            fontSize: 18, fontWeight: 700,
             color: passed ? "#4ec88c" : "#ff7070",
             fontVariantNumeric: "tabular-nums",
           }}>
@@ -146,14 +185,13 @@ function StandardCard({ standard, defaultOpen }) {
 
         {/* Chevron */}
         <div style={{
-          color: "rgba(255,255,255,0.3)",
-          fontSize: 12,
+          color: "rgba(255,255,255,0.3)", fontSize: 12,
           transform: open ? "rotate(180deg)" : "rotate(0deg)",
           transition: "transform 0.2s",
         }}>▼</div>
       </div>
 
-      {/* Score bar always visible */}
+      {/* Score bar — always visible */}
       <div style={{ padding: "0 16px 8px" }}>
         <ScoreBar score={standard.score_pct} accent={colors.accent} />
       </div>
@@ -165,17 +203,18 @@ function StandardCard({ standard, defaultOpen }) {
 
           {standard.suggestions && standard.suggestions.length > 0 && (
             <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <div style={{
+                fontSize: 11, color: "rgba(255,255,255,0.35)", marginBottom: 6,
+                textTransform: "uppercase", letterSpacing: "0.06em",
+              }}>
                 Suggestions
               </div>
               {standard.suggestions.map((s, i) => (
                 <div key={i} style={{
-                  fontSize: 12,
-                  color: "rgba(255,220,100,0.8)",
+                  fontSize: 12, color: "rgba(255,220,100,0.8)",
                   padding: "4px 0 4px 10px",
                   borderLeft: "2px solid rgba(255,200,50,0.3)",
-                  marginBottom: 4,
-                  lineHeight: 1.5,
+                  marginBottom: 4, lineHeight: 1.5,
                 }}>
                   {s}
                 </div>
@@ -188,13 +227,13 @@ function StandardCard({ standard, defaultOpen }) {
   );
 }
 
+// ── Skeleton loader ───────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
     <div style={{
       background: "#151c30",
       border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: 10,
-      padding: "14px 16px",
+      borderRadius: 10, padding: "14px 16px",
       animation: "pulse 1.5s ease-in-out infinite",
     }}>
       <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -210,6 +249,7 @@ function SkeletonCard() {
   );
 }
 
+// ── Main export ───────────────────────────────────────────────────────────────
 export default function IEEEComplianceReport({ report, loading }) {
   if (loading) {
     return (
@@ -244,37 +284,28 @@ export default function IEEEComplianceReport({ report, loading }) {
 
       {/* Overall verdict banner */}
       <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 16,
-        padding: "14px 18px",
-        borderRadius: 10,
+        display: "flex", alignItems: "center", gap: 16,
+        padding: "14px 18px", borderRadius: 10,
         background: isCompliant ? "rgba(78,200,140,0.08)" : "rgba(255,90,90,0.08)",
         border: `1px solid ${isCompliant ? "rgba(78,200,140,0.3)" : "rgba(255,90,90,0.25)"}`,
         marginBottom: 12,
       }}>
         <div style={{
-          fontSize: 28,
-          fontWeight: 800,
+          fontSize: 28, fontWeight: 800,
           color: isCompliant ? "#4ec88c" : "#ff7070",
-          fontVariantNumeric: "tabular-nums",
-          lineHeight: 1,
+          fontVariantNumeric: "tabular-nums", lineHeight: 1,
         }}>
           {report.overall_score_pct}%
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: isCompliant ? "#4ec88c" : "#ff7070",
-          }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: isCompliant ? "#4ec88c" : "#ff7070" }}>
             {isCompliant ? "Fully Compliant" : "Needs Improvement"}
           </div>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
-            {passedCount} of 5 IEEE standards passed
+            {passedCount} of 5 IEEE standards passed · RAG-verified: 830, 829, 1016
           </div>
         </div>
-        {/* Mini bar chart of 5 standards */}
+        {/* Mini bar chart */}
         <div style={{ display: "flex", gap: 4, alignItems: "flex-end", height: 32 }}>
           {report.standards.map((s) => (
             <div
@@ -295,18 +326,18 @@ export default function IEEEComplianceReport({ report, loading }) {
 
       {/* Per-standard cards */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {report.standards.map((standard, i) => (
+        {report.standards.map((standard) => (
           <StandardCard
             key={standard.id}
             standard={standard}
-            defaultOpen={!standard.passed}   /* auto-open failing ones */
+            defaultOpen={!standard.passed}
           />
         ))}
       </div>
 
       {/* Footer */}
       <div style={{ marginTop: 10, fontSize: 11, color: "rgba(255,255,255,0.2)", textAlign: "right" }}>
-        SIRS · IEEE 12207 · 830 · 829 · 1016 · 730
+        SIRS · IEEE 12207 · 830 · 829 · 1016 · 730 · RAG-verified against official PDFs
       </div>
     </div>
   );
