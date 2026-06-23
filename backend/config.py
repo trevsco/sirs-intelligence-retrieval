@@ -25,7 +25,8 @@ class Settings(BaseSettings):
     SIMILARITY_THRESHOLD: float = Field(0.0, description="Similarity threshold for vector retrieval (set to 0.0 to return all chunks)")
     CHUNK_SIZE: int = Field(512, description="Chunk size in characters")
     CHUNK_OVERLAP: int = Field(64, description="Chunk overlap in characters")
-    TOP_K: int = Field(3, description="Number of top chunks to retrieve")
+    TOP_K: int = Field(7, description="Number of top chunks to retrieve")
+    LLM_CONTEXT_CHARS: int = Field(5000, description="Maximum retrieved context characters sent to the LLM")
     
     # Models Configuration
     EMBEDDING_MODEL: str = Field("all-MiniLM-L6-v2", description="Sentence-Transformers embedding model")
@@ -34,8 +35,8 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = Field("http://localhost:11434", description="Ollama base API URL")
     
     # LLM Settings
-    LLM_TEMPERATURE: float = Field(0.1, description="Ollama temperature")
-    LLM_MAX_TOKENS: int = Field(256, description="Maximum completion tokens")
+    LLM_TEMPERATURE: float = Field(0.2, description="Ollama temperature")
+    LLM_MAX_TOKENS: int = Field(1024, description="Maximum completion tokens")
     
     # Security & Files
     MAX_UPLOAD_SIZE_MB: int = Field(50, description="Maximum document size in MB")

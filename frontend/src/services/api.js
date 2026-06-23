@@ -21,12 +21,22 @@ const api = {
   
   getSystemStatus: () => request('/system/status'),
   
-  query: (query, topK = 5, threshold = 0.0) => request('/query', {
+  query: (
+    query,
+    docId = null,
+    topK = 5,
+    threshold = 0.0
+  ) => request('/query', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ query, top_k: topK, threshold })
+    body: JSON.stringify({
+      query,
+      doc_id: docId,
+      top_k: topK,
+      threshold
+    })
   }),
   
   uploadDocument: (file) => {

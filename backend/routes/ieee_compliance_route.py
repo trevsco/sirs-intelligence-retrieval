@@ -64,7 +64,7 @@ async def run_ieee_compliance_check(request: ComplianceCheckRequest):
     individual check results, failures, and improvement suggestions.
     """
     try:
-        report = check_compliance(request.content)
+        report = await check_compliance(request.content)
         return ComplianceCheckResponse(
             label=request.label,
             compliance_report=report,

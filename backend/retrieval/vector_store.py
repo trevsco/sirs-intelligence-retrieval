@@ -131,7 +131,7 @@ class VectorStore:
                     f"Total vectors: {self._index.ntotal}")
 
     def search(self, query_vector: np.ndarray, top_k: int,
-               threshold: float = 0.0) -> list:
+               threshold: float = 0.0, doc_id: str = None) -> list:
         """
         Search FAISS index for top-K most similar chunks.
 
@@ -147,8 +147,9 @@ class VectorStore:
         # Reshape to (1, dim) for FAISS
         query = query_vector.reshape(1, -1).astype(np.float32)
 
-        # Search — returns (distances, indices)
-        actual_k       = min(top_k, self._index.ntotal)
+        # Search returns (distances, indices). When a document filter is active,
+        # search the whole index first so other documents cannot hide matches.
+        actual_k       = self._index.ntotal if doc_id else min(top_k, self._index.ntotal)
         scores, indices = self._index.search(query, actual_k)
 
         results = []
@@ -160,13 +161,21 @@ class VectorStore:
             # Clamp to [0, 1] to handle floating point edge cases
             similarity = float(np.clip(score, 0.0, 1.0))
 
+            metadata = self._metadata[idx]
+
+            if doc_id and metadata.get("doc_id") != doc_id:
+                continue
+
             if similarity < threshold:
                 continue
 
             results.append({
-                **self._metadata[idx],
+                **metadata,
                 "score": round(similarity, 4),
             })
+
+            if len(results) >= top_k:
+                break
 
         # Sort by score descending
         results.sort(key=lambda x: x["score"], reverse=True)
