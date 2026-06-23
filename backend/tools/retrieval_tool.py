@@ -25,6 +25,10 @@ from config import settings
                 "type": "number", 
                 "description": "Cosine similarity cutoff (default is 0.0)", 
                 "default": 0.0
+            },
+            "doc_id": {
+                "type": "string",
+                "description": "Optional document id to limit retrieval"
             }
         },
         "required": ["query"]
@@ -32,6 +36,7 @@ from config import settings
 )
 async def retrieve_documents(
     query: str, 
+    doc_id: str = None,
     top_k: int = None, 
     threshold: float = None
 ) -> MCPResponse:
@@ -44,7 +49,7 @@ async def retrieve_documents(
     t = threshold if threshold is not None else settings.SIMILARITY_THRESHOLD
     
     try:
-        result = rag_pipeline.run(query=query, top_k=k, threshold=t)
+        result = rag_pipeline.run(query=query, top_k=k, threshold=t, doc_id=doc_id)
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
         return MCPResponse.make_success(
             message_id=msg_id,

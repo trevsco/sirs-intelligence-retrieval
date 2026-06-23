@@ -20,6 +20,7 @@ router = APIRouter(prefix="/api/v1")
 # Pydantic Schemas
 class QueryRequest(BaseModel):
     query: str = Field(..., description="Query query for the AI agent")
+    doc_id: Optional[str] = Field(default=None, description="Optional document id to limit retrieval")
     top_k: int = Field(default=5, description="Number of source documents to return")
     threshold: float = Field(default=0.0, description="Similarity matching cutoff (default 0.0)")
 
@@ -83,6 +84,7 @@ async def post_query(request: QueryRequest) -> QueryResponse:
     try:
         response_payload = await agent_controller.handle_query(
             query=request.query,
+            doc_id=request.doc_id,
             top_k=request.top_k,
             threshold=request.threshold
         )
@@ -213,6 +215,7 @@ async def get_settings() -> Dict[str, Any]:
         "CHUNK_SIZE": settings.CHUNK_SIZE,
         "CHUNK_OVERLAP": settings.CHUNK_OVERLAP,
         "TOP_K": settings.TOP_K,
+        "LLM_CONTEXT_CHARS": settings.LLM_CONTEXT_CHARS,
         "EMBEDDING_MODEL": settings.EMBEDDING_MODEL,
         "EMBEDDING_DIM": settings.EMBEDDING_DIM,
         "OLLAMA_MODEL": settings.OLLAMA_MODEL,

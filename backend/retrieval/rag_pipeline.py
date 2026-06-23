@@ -12,7 +12,8 @@ class RAGPipeline:
     def run(
         query: str, 
         top_k: int = 5, 
-        threshold: float = 0.0
+        threshold: float = 0.0,
+        doc_id: str = None
     ) -> Dict[str, Any]:
         """
         Execute the retrieval pipeline:
@@ -21,14 +22,22 @@ class RAGPipeline:
         3. Compute confidence score based on the retrieval similarity scores.
         4. Deduplicate source filenames.
         """
-        logger.info(f"Running RAG pipeline for query: '{query}', top_k: {top_k}, threshold: {threshold}")
+        logger.info(
+            f"Running RAG pipeline for query: '{query}', top_k: {top_k}, "
+            f"threshold: {threshold}, doc_id: {doc_id or 'all'}"
+        )
         
         # ── FIX 1: Convert the text query into a mathematical vector ──
         # We use encode_batch here because we know from vector_store.py that this method exists
         query_vector = embedding_model.encode_batch([query])[0]
         
         # Now we pass the vector to FAISS, not the string!
-        results = vector_store.search(query_vector, top_k=top_k, threshold=threshold)
+        results = vector_store.search(
+            query_vector,
+            top_k=top_k,
+            threshold=threshold,
+            doc_id=doc_id,
+        )
         # ─────────────────────────────────────────────────────────────
         
         if not results:

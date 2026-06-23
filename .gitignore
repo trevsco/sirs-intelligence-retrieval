@@ -9,6 +9,8 @@ __pycache__/
 # FAISS index (large binary files)
 backend/models/
 backend/logs/
+backend/data/faiss_index/
+backend/data/ieee_compliance_results.json
 
 # Node
 frontend/node_modules/

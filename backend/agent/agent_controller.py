@@ -19,6 +19,7 @@ from mcp.protocol      import MCPMessage, MCPResponse, ToolStatus
 from mcp.communication import mcp_bus
 from llm.ollama_client import ollama_client
 from tools.ieee_compliance_tool import check_compliance        # ← updated import
+from config import settings
 
 
 class AgentController:
@@ -36,7 +37,8 @@ class AgentController:
     async def handle_query(
         self,
         query:     str,
-        top_k:     int   = 3,
+        doc_id:    str | None = None,
+        top_k:     int   = 8,
         threshold: float = 0.0,
     ) -> dict:
         """
@@ -66,6 +68,7 @@ class AgentController:
             action="search",
             payload={
                 "query":     query,
+                "doc_id":    doc_id,
                 "top_k":     top_k,
                 "threshold": threshold,
             }
@@ -110,7 +113,10 @@ class AgentController:
                 "Please upload relevant documents first, then try again."
             )
         else:
-            answer = await ollama_client.generate(query=query, context=context[:1500])
+            answer = await ollama_client.generate(
+                query=query,
+                context=context[:settings.LLM_CONTEXT_CHARS],
+            )
 
         llm_ms = (time.perf_counter() - llm_start) * 1000
         tool_trace.append({

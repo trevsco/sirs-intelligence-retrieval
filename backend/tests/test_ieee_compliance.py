@@ -9,10 +9,16 @@ Run:
     pytest test_ieee_compliance.py -v
 """
 
+import asyncio
 import pytest
-from tools.ieee_compliance_tool import check_compliance, IEEEComplianceChecker
+import tools.ieee_compliance_tool as compliance_module
+from tools.ieee_compliance_tool import IEEEComplianceChecker
 
 checker = IEEEComplianceChecker()
+
+
+async def keyword_only_rag(content, standard_id, standard_name, fallback_fn):
+    return fallback_fn(content)
 
 
 # ─────────────────────────────────────────────
@@ -139,12 +145,13 @@ def test_tc08_ieee_829_fails_on_minimal_content():
 def test_tc09_empty_content_raises_value_error():
     """TC-09: Empty content should raise ValueError, not crash silently."""
     with pytest.raises(ValueError, match="Content cannot be empty"):
-        checker.run_full_compliance_check(EMPTY_CONTENT)
+        asyncio.run(checker.run_full_compliance_check(EMPTY_CONTENT))
 
 
-def test_tc10_overall_report_fails_on_minimal_content():
+def test_tc10_overall_report_fails_on_minimal_content(monkeypatch):
     """TC-10: Full report should return overall_passed=False for minimal content."""
-    report = checker.run_full_compliance_check(MINIMAL_CONTENT)
+    monkeypatch.setattr(checker, "_check_standard_rag", keyword_only_rag)
+    report = asyncio.run(checker.run_full_compliance_check(MINIMAL_CONTENT))
     assert report.overall_passed is False
     assert report.overall_score < 0.5
 
@@ -153,9 +160,10 @@ def test_tc10_overall_report_fails_on_minimal_content():
 #  TC-11 to TC-13: Report structure tests
 # ─────────────────────────────────────────────
 
-def test_tc11_full_report_has_five_standards():
+def test_tc11_full_report_has_five_standards(monkeypatch):
     """TC-11: Full compliance report must contain exactly 5 IEEE standards."""
-    report = checker.run_full_compliance_check(RICH_CONTENT)
+    monkeypatch.setattr(checker, "_check_standard_rag", keyword_only_rag)
+    report = asyncio.run(checker.run_full_compliance_check(RICH_CONTENT))
     assert len(report.standards) == 5
     ids = [s.standard_id for s in report.standards]
     assert "IEEE 12207" in ids
@@ -165,9 +173,10 @@ def test_tc11_full_report_has_five_standards():
     assert "IEEE 730"   in ids
 
 
-def test_tc12_to_dict_is_json_serializable():
+def test_tc12_to_dict_is_json_serializable(monkeypatch):
     """TC-12: to_dict() output must be JSON-serializable with correct keys."""
-    report = checker.run_full_compliance_check(RICH_CONTENT)
+    monkeypatch.setattr(checker, "_check_standard_rag", keyword_only_rag)
+    report = asyncio.run(checker.run_full_compliance_check(RICH_CONTENT))
     d = report.to_dict()
 
     assert "overall_score_pct" in d
@@ -180,9 +189,10 @@ def test_tc12_to_dict_is_json_serializable():
     assert len(d["standards"]) == 5
 
 
-def test_tc13_check_compliance_public_function():
+def test_tc13_check_compliance_public_function(monkeypatch):
     """TC-13: Public check_compliance() function should return a valid report dict."""
-    result = check_compliance(RICH_CONTENT)
+    monkeypatch.setattr(compliance_module._checker, "_check_standard_rag", keyword_only_rag)
+    result = asyncio.run(compliance_module.check_compliance(RICH_CONTENT))
     assert isinstance(result, dict)
     assert "overall_score_pct" in result
     assert result["overall_score_pct"] > 0
@@ -198,9 +208,10 @@ def test_tc14_suggestions_given_for_failing_checks():
     assert len(result.suggestions) > 0, "Failing standard should have suggestions."
 
 
-def test_tc15_scores_are_within_valid_range():
+def test_tc15_scores_are_within_valid_range(monkeypatch):
     """TC-15: All standard scores must be between 0.0 and 1.0 (inclusive)."""
-    report = checker.run_full_compliance_check(PARTIAL_CONTENT)
+    monkeypatch.setattr(checker, "_check_standard_rag", keyword_only_rag)
+    report = asyncio.run(checker.run_full_compliance_check(PARTIAL_CONTENT))
     for standard in report.standards:
         assert 0.0 <= standard.score <= 1.0, (
             f"{standard.standard_id} score {standard.score} is out of range [0.0, 1.0]"

@@ -185,10 +185,17 @@ class IEEEComplianceChecker:
         }
         score    = sum(checks.values()) / len(checks)
         failures = [k.replace("_", " ").capitalize() for k, v in checks.items() if not v]
+        suggestions = []
+        if not checks["has_functional_requirements"]:
+            suggestions.append("Add clear functional requirements using shall/must statements.")
+        if not checks["has_measurable_criteria"]:
+            suggestions.append("Add measurable acceptance criteria such as percentages, latency, or limits.")
+        if not checks["has_traceability_indicators"]:
+            suggestions.append("Add requirement identifiers or traceability markers such as REQ-01.")
         return StandardResult(
             standard_id="IEEE 830", standard_name="Software Requirements Specifications",
             passed=score >= self.PASS_THRESHOLD,
-            score=score, checks=checks, failures=failures, suggestions=[],
+            score=score, checks=checks, failures=failures, suggestions=suggestions,
         )
 
     def _keyword_829(self, content: str) -> StandardResult:
@@ -210,10 +217,15 @@ class IEEEComplianceChecker:
         }
         score    = sum(checks.values()) / len(checks)
         failures = [k.replace("_", " ").capitalize() for k, v in checks.items() if not v]
+        suggestions = []
+        if not checks["has_test_plan_or_cases"]:
+            suggestions.append("Add test plans or test cases with stable test identifiers.")
+        if not checks["has_expected_results"]:
+            suggestions.append("Document expected results and pass/fail criteria for each test.")
         return StandardResult(
             standard_id="IEEE 829", standard_name="Software Test Documentation",
             passed=score >= self.PASS_THRESHOLD,
-            score=score, checks=checks, failures=failures, suggestions=[],
+            score=score, checks=checks, failures=failures, suggestions=suggestions,
         )
 
     def _keyword_1016(self, content: str) -> StandardResult:
@@ -237,11 +249,28 @@ class IEEEComplianceChecker:
         }
         score    = sum(checks.values()) / len(checks)
         failures = [k.replace("_", " ").capitalize() for k, v in checks.items() if not v]
+        suggestions = []
+        if not checks["has_architecture_description"]:
+            suggestions.append("Add an architecture description with major components or layers.")
+        if not checks["has_design_rationale"]:
+            suggestions.append("Document design rationale and trade-offs for key choices.")
         return StandardResult(
             standard_id="IEEE 1016", standard_name="Software Design Description",
             passed=score >= self.PASS_THRESHOLD,
-            score=score, checks=checks, failures=failures, suggestions=[],
+            score=score, checks=checks, failures=failures, suggestions=suggestions,
         )
+
+    def check_ieee_830(self, content: str) -> StandardResult:
+        """Fast keyword-only IEEE 830 check used by tests and fallbacks."""
+        return self._keyword_830(content)
+
+    def check_ieee_829(self, content: str) -> StandardResult:
+        """Fast keyword-only IEEE 829 check used by tests and fallbacks."""
+        return self._keyword_829(content)
+
+    def check_ieee_1016(self, content: str) -> StandardResult:
+        """Fast keyword-only IEEE 1016 check used by tests and fallbacks."""
+        return self._keyword_1016(content)
 
     # =========================================================================
     #  RAG + LLM CHECK (core of the upgrade)
