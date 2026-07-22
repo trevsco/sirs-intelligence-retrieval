@@ -349,128 +349,32 @@
       ]
     }
   },
-  "9fcdbb6e-ead3-48e8-9e30-8639918d508d": {
-    "filename": "drdo_test_paper_tinyllama.pdf",
+  "0e0e8b26-f4c3-42db-ad57-a143681128e9": {
+    "filename": "UAV_Test_Document_With_Inconsistencies.docx",
     "report": {
-      "timestamp": "2026-06-14T17:53:02.075530",
-      "overall_score_pct": 60.0,
+      "timestamp": "2026-07-21T23:16:55.855602",
+      "overall_score_pct": 33.3,
       "overall_passed": false,
       "verdict": "NEEDS IMPROVEMENT \u26a0\ufe0f",
-      "summary": "2/5 IEEE standards passed | Overall score: 60.0% | NEEDS IMPROVEMENT \u26a0\ufe0f | RAG-verified: IEEE 830, 829, 1016",
+      "summary": "0/5 IEEE standards passed | Overall score: 33.3% | NEEDS IMPROVEMENT \u26a0\ufe0f | RAG-verified: IEEE 830, 829, 1016",
       "standards": [
         {
           "id": "IEEE 12207",
           "name": "Software Life Cycle Processes",
-          "passed": true,
-          "score_pct": 83.3,
+          "passed": false,
+          "score_pct": 33.3,
           "checks": {
             "covers_requirements_phase": false,
-            "covers_design_phase": true,
-            "covers_implementation_phase": true,
-            "covers_testing_phase": true,
-            "covers_deployment_or_maintenance": true,
-            "defines_process_roles": true
-          },
-          "failures": [
-            "Covers requirements phase"
-          ],
-          "suggestions": [
-            "Add requirements documentation to cover the IEEE 12207 acquisition/supply process."
-          ]
-        },
-        {
-          "id": "IEEE 830",
-          "name": "Software Requirements Specifications",
-          "passed": false,
-          "score_pct": 50.0,
-          "checks": {
-            "rag_parse_error": false
-          },
-          "failures": [
-            "LLM response could not be parsed"
-          ],
-          "suggestions": [
-            "Manually verify content against IEEE 830 \u2014 Software Requirements Specifications."
-          ]
-        },
-        {
-          "id": "IEEE 829",
-          "name": "Software Test Documentation",
-          "passed": false,
-          "score_pct": 50.0,
-          "checks": {
-            "rag_parse_error": false
-          },
-          "failures": [
-            "LLM response could not be parsed"
-          ],
-          "suggestions": [
-            "Manually verify content against IEEE 829 \u2014 Software Test Documentation."
-          ]
-        },
-        {
-          "id": "IEEE 1016",
-          "name": "Software Design Description",
-          "passed": false,
-          "score_pct": 50.0,
-          "checks": {
-            "rag_parse_error": false
-          },
-          "failures": [
-            "LLM response could not be parsed"
-          ],
-          "suggestions": [
-            "Manually verify content against IEEE 1016 \u2014 Software Design Description."
-          ]
-        },
-        {
-          "id": "IEEE 730",
-          "name": "Software Quality Assurance",
-          "passed": true,
-          "score_pct": 66.7,
-          "checks": {
-            "has_quality_objectives": false,
-            "has_review_process": false,
-            "has_metrics_defined": true,
-            "has_defect_tracking": true,
-            "has_standards_compliance_mention": true,
-            "has_security_or_access_control": true
-          },
-          "failures": [
-            "Has quality objectives",
-            "Has review process"
-          ],
-          "suggestions": [
-            "Document the code review and QA process per IEEE 730 \u00a74.2."
-          ]
-        }
-      ]
-    }
-  },
-  "4e8562a9-e0a9-481d-8ea1-0f1349c1bd5c": {
-    "filename": "Attention Is All You Need.pdf",
-    "report": {
-      "timestamp": "2026-06-21T17:45:43.096342",
-      "overall_score_pct": 51.7,
-      "overall_passed": false,
-      "verdict": "NEEDS IMPROVEMENT \u26a0\ufe0f",
-      "summary": "2/5 IEEE standards passed | Overall score: 51.7% | NEEDS IMPROVEMENT \u26a0\ufe0f | RAG-verified: IEEE 830, 829, 1016",
-      "standards": [
-        {
-          "id": "IEEE 12207",
-          "name": "Software Life Cycle Processes",
-          "passed": true,
-          "score_pct": 66.7,
-          "checks": {
-            "covers_requirements_phase": false,
-            "covers_design_phase": true,
-            "covers_implementation_phase": true,
+            "covers_design_phase": false,
+            "covers_implementation_phase": false,
             "covers_testing_phase": true,
             "covers_deployment_or_maintenance": true,
             "defines_process_roles": false
           },
           "failures": [
             "Covers requirements phase",
+            "Covers design phase",
+            "Covers implementation phase",
             "Defines process roles"
           ],
           "suggestions": [
@@ -481,81 +385,86 @@
           "id": "IEEE 830",
           "name": "Software Requirements Specifications",
           "passed": false,
-          "score_pct": 50.0,
+          "score_pct": 25.0,
           "checks": {
-            "clause_page_3_satisfied": false,
-            "clause_page_7_satisfied": false,
-            "cited_pages": "IEEE standard pages: 3, 7, 3"
+            "clause_page_2_satisfied": false,
+            "clause_page_30_satisfied": false,
+            "clause_page_10_satisfied": false,
+            "cited_pages": "IEEE standard pages: 2, 30, 10"
           },
           "failures": [
-            "clause_page_3_satisfied",
-            "clause_page_7_satisfied"
+            "clause_page_2_satisfied",
+            "clause_page_30_satisfied",
+            "clause_page_10_satisfied"
           ],
           "suggestions": [
-            "Review IEEE 830 (Software Requirements Specifications). Assessment: The provided document content does not contain sufficient information to evaluate against Clause 1 or any other clause of IEEE 830."
+            "IEEE 830: Official software requirements specification content is missing.",
+            "Review IEEE 830 (Software Requirements Specifications). Assessment: The document does not contain sufficient information to evaluate against official clauses of IEEE Std 830-1998(R2009)."
           ]
         },
         {
           "id": "IEEE 829",
           "name": "Software Test Documentation",
           "passed": false,
-          "score_pct": 50.0,
+          "score_pct": 25.0,
           "checks": {
-            "clause_page_30_satisfied": false,
-            "clause_page_39_satisfied": false,
-            "clause_page_21_satisfied": false,
-            "cited_pages": "IEEE standard pages: 30, 39, 21"
+            "clause_page_32_satisfied": false,
+            "clause_page_27_satisfied": false,
+            "clause_page_22_satisfied": false,
+            "cited_pages": "IEEE standard pages: 32, 27, 22"
           },
           "failures": [
-            "clause_page_30_satisfied",
-            "clause_page_39_satisfied",
-            "clause_page_21_satisfied"
+            "clause_page_32_satisfied",
+            "clause_page_27_satisfied",
+            "clause_page_22_satisfied"
           ],
           "suggestions": [
-            "Review IEEE 829 (Software Test Documentation). Assessment: The indexed documents do not contain sufficient information to answer this query."
+            "IEEE 829: ['Detailed test results and outcomes for each major testing activity', 'Names and titles of persons who must approve this report with their signatures and dates']",
+            "Review IEEE 829 (Software Test Documentation). Assessment: The document does not contain sufficient information to evaluate all required clauses of clause 1 as per IEEE Std 829-1998."
           ]
         },
         {
           "id": "IEEE 1016",
           "name": "Software Design Description",
           "passed": false,
-          "score_pct": 25.0,
+          "score_pct": 50.0,
           "checks": {
-            "clause_page_1_satisfied": false,
-            "clause_page_16_satisfied": false,
-            "clause_page_12_satisfied": false,
-            "cited_pages": "IEEE standard pages: 1, 16, 12"
+            "clause_page_11_satisfied": false,
+            "clause_page_8_satisfied": false,
+            "clause_page_18_satisfied": false,
+            "cited_pages": "IEEE standard pages: 11, 8, 18"
           },
           "failures": [
-            "clause_page_1_satisfied",
-            "clause_page_16_satisfied",
-            "clause_page_12_satisfied"
+            "clause_page_11_satisfied",
+            "clause_page_8_satisfied",
+            "clause_page_18_satisfied"
           ],
           "suggestions": [
-            "IEEE 1016: Detailed descriptions fulfilling Clauses 2 and 3 requirements are missing.",
-            "Review IEEE 1016 (Software Design Description). Assessment: The provided document content does not contain sufficient information to evaluate against all clauses of Clause 1 through Clause 3 as specified in IEEE Standard 1016."
+            "IEEE 1016: ['communications protocol', 'data format']",
+            "Review IEEE 1016 (Software Design Description). Assessment: The document does not provide sufficient details about communications protocol or data format as required by Clause 1."
           ]
         },
         {
           "id": "IEEE 730",
           "name": "Software Quality Assurance",
-          "passed": true,
-          "score_pct": 66.7,
+          "passed": false,
+          "score_pct": 33.3,
           "checks": {
-            "has_quality_objectives": true,
+            "has_quality_objectives": false,
             "has_review_process": false,
             "has_metrics_defined": true,
-            "has_defect_tracking": true,
-            "has_standards_compliance_mention": true,
-            "has_security_or_access_control": false
+            "has_defect_tracking": false,
+            "has_standards_compliance_mention": false,
+            "has_security_or_access_control": true
           },
           "failures": [
+            "Has quality objectives",
             "Has review process",
-            "Has security or access control"
+            "Has defect tracking",
+            "Has standards compliance mention"
           ],
           "suggestions": [
-            "Document the code review and QA process per IEEE 730 \u00a74.2.",
-            "Include security/access control documentation per IEEE 730 \u00a74.7."
+            "Document the code review and QA process per IEEE 730 \u00a74.2."
           ]
         }
       ]

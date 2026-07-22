@@ -14,6 +14,7 @@ from mcp.tool_registry import tool_registry
 from retrieval.vector_store import vector_store
 from llm.ollama_client import ollama_client
 from tools.ieee_compliance_store import get_compliance, get_all_compliance
+from agent.document_analyzer import document_analyzer
 
 router = APIRouter(prefix="/api/v1")
 
@@ -36,6 +37,9 @@ class QueryResponse(BaseModel):
     num_chunks_retrieved: int
     elapsed_ms: float
     compliance_report: Optional[Dict[str, Any]] = None
+
+class AnalyzeResponse(BaseModel):
+    analysis: str
 
 # 1. GET /health
 @router.get("/health", response_model=Dict[str, Any])
@@ -253,6 +257,22 @@ async def get_all_documents_compliance() -> Dict[str, Any]:
     """
     from tools.ieee_compliance_store import get_all_compliance
     all_data = get_all_compliance()
+
+@router.post("/analyze", response_model=AnalyzeResponse)
+async def analyze_documents():
+    """
+    Analyze all indexed documents and return a summary with observations.
+    """
+    try:
+        result = await document_analyzer.analyze_documents()
+        return AnalyzeResponse(**result)
+
+    except Exception as e:
+        logger.exception("Document analysis failed")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Document analysis failed: {str(e)}"
+        )
  
     # Return lightweight summary (not full report) for the document list view
     summary = {}

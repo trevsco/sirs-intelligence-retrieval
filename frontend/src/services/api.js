@@ -17,7 +17,7 @@ const request = async (endpoint, options = {}) => {
 };
 
 const api = {
-  getHealth: () => request('/health'),
+  getHealth: () => request('/health'),  
   
   getSystemStatus: () => request('/system/status'),
   
@@ -57,8 +57,12 @@ const api = {
   getMCPTools: () => request('/mcp/tools'),
   
   getMCPLogs: () => request('/mcp/log'),
-  
-  getSettings: () => request('/settings')
+
+  getSettings: () => request('/settings'),
+
+  analyzeDocuments: () => request('/analyze', {
+    method: 'POST'
+  })
 };
 
 export default api;

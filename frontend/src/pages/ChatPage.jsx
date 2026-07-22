@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import IEEEComplianceReport from '../components/IEEEComplianceReport';
+import { useTimer } from "../context/TimerContext";
+import ProcessingStatus from "../components/ProcessingStatus";
+
 
 function ChatPage({ refreshStats }) {
 
@@ -12,6 +15,12 @@ function ChatPage({ refreshStats }) {
   // Document selection
   const [documents, setDocuments] = useState([]);
   const [selectedDoc, setSelectedDoc] = useState("");
+
+  const {
+    startTimer,
+    stopTimer
+} = useTimer();
+
 
   useEffect(() => {
 
@@ -62,6 +71,7 @@ function ChatPage({ refreshStats }) {
     if (!overrideText)
       setQuery('');
 
+    startTimer();
     setLoading(true);
 
     try {
@@ -101,7 +111,7 @@ function ChatPage({ refreshStats }) {
       ]);
 
     } finally {
-
+      stopTimer();
       setLoading(false);
 
     }
@@ -178,6 +188,8 @@ function ChatPage({ refreshStats }) {
 
       </div>
 
+    <ProcessingStatus />
+    
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
 

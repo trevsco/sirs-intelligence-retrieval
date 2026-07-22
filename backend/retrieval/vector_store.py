@@ -231,6 +231,20 @@ class VectorStore:
                 })
         return docs
 
+    def get_all_chunks(self) -> list:
+        """
+        Return all indexed text chunks.
+        """
+        self._ensure_loaded()
+
+        return [
+            {
+                "doc_id": m["doc_id"],
+                "filename": m["filename"],
+                "text": m["content"],
+            }
+            for m in self._metadata
+        ]
 
 # Module-level singleton
 vector_store = VectorStore()
